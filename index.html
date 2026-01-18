@@ -3,119 +3,145 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Animal Clicker</title>
+<title>Animal Kombat</title>
 <style>
-    body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        background: url('https://images.unsplash.com/photo-1508672019048-805c876b67e2?auto=format&fit=crop&w=1350&q=80') no-repeat center center fixed;
-        background-size: cover;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        overflow: hidden;
-    }
-
-    .game {
-        text-align: center;
-        background: rgba(255,255,255,0.8);
-        padding: 20px;
-        border-radius: 20px;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-    }
-
-    h1 {
-        margin-bottom: 10px;
-        font-size: 28px;
-    }
-
-    .coins {
-        font-size: 22px;
-        margin-bottom: 15px;
-    }
-
-    .animal {
-        width: 120px;
-        cursor: pointer;
-        transition: transform 0.1s;
-        user-select: none;
-    }
-
-    .animal:active {
-        transform: scale(0.9);
-    }
-
-    #animalsButtons img {
-        width: 60px;
-        margin: 5px;
-        cursor: pointer;
-        border: 2px solid transparent;
-        border-radius: 10px;
-        transition: 0.2s;
-    }
-
-    #animalsButtons img.selected {
-        border-color: gold;
-    }
-
-    .ranking {
-        margin-top: 15px;
-        font-size: 18px;
-    }
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: url('https://images.unsplash.com/photo-1508672019048-805c876b67e2?auto=format&fit=crop&w=1350&q=80') no-repeat center center fixed;
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+.game {
+    background: rgba(255,255,255,0.9);
+    border-radius: 20px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    width: 90%;
+    max-width: 400px;
+}
+h1 { margin-bottom: 10px; }
+.coins, .hp, .ranking { font-size: 18px; margin-bottom: 10px; }
+button { padding: 10px 20px; margin: 5px; font-size: 16px; border-radius: 10px; cursor: pointer; }
+#mainAnimal, #npcAnimal { width: 100px; margin: 10px; }
+.selected { border: 2px solid gold; border-radius: 10px; }
 </style>
 </head>
 <body>
-
 <div class="game">
-    <h1>Animal Clicker</h1>
-    <div class="coins">🪙 Монетки: <span id="coins">0</span></div>
-    
-    <img id="mainAnimal" class="animal" src="https://cdn-icons-png.flaticon.com/512/616/616408.png" alt="animal">
+<h1>Animal Kombat</h1>
 
-    <div id="animalsButtons">
-        <img src="https://cdn-icons-png.flaticon.com/512/616/616408.png" data-name="Кот" class="selected">
-        <img src="https://cdn-icons-png.flaticon.com/512/616/616408.png" data-name="Собака">
-        <img src="https://cdn-icons-png.flaticon.com/512/616/616497.png" data-name="Кролик">
-        <img src="https://cdn-icons-png.flaticon.com/512/616/616494.png" data-name="Лиса">
-    </div>
+<div class="coins">🪙 Монетки: <span id="coins">0</span></div>
 
-    <div class="ranking">
-        🏆 Рейтинг: <span id="ranking">0</span>
-    </div>
+<div class="hp">❤️ Твоё HP: <span id="playerHp">100</span></div>
+<img id="mainAnimal" src="https://cdn-icons-png.flaticon.com/512/616/616408.png" alt="player">
+
+<div class="hp">💔 Противник HP: <span id="npcHp">100</span></div>
+<img id="npcAnimal" src="https://cdn-icons-png.flaticon.com/512/616/616497.png" alt="npc">
+
+<button id="attackBtn">🗡 Атаковать!</button>
+<button id="upgradeBtn">⚡ Апгрейд удара (10 🪙)</button>
+
+<h3>Выбор персонажа:</h3>
+<div id="animalsButtons">
+    <img src="https://cdn-icons-png.flaticon.com/512/616/616408.png" data-name="Кот" class="selected">
+    <img src="https://cdn-icons-png.flaticon.com/512/616/616497.png" data-name="Кролик">
+</div>
+
+<h3>🏆 Таблица лидеров:</h3>
+<div id="ranking">
+</div>
 </div>
 
 <script>
-    let coins = parseInt(localStorage.getItem('coins')) || 0;
-    let ranking = parseInt(localStorage.getItem('ranking')) || 0;
-    const coinsEl = document.getElementById('coins');
-    const rankingEl = document.getElementById('ranking');
-    const mainAnimal = document.getElementById('mainAnimal');
-    const animalButtons = document.querySelectorAll('#animalsButtons img');
+let coins = parseInt(localStorage.getItem('coins')) || 0;
+let attackPower = parseInt(localStorage.getItem('attackPower')) || 1;
+let playerHp = 100;
+let npcHp = 100;
+const coinsEl = document.getElementById('coins');
+const playerHpEl = document.getElementById('playerHp');
+const npcHpEl = document.getElementById('npcHp');
+const mainAnimal = document.getElementById('mainAnimal');
+const npcAnimal = document.getElementById('npcAnimal');
+const attackBtn = document.getElementById('attackBtn');
+const upgradeBtn = document.getElementById('upgradeBtn');
+const rankingDiv = document.getElementById('ranking');
 
-    // Обновляем счётчики
+coinsEl.textContent = coins;
+
+// Таблица лидеров
+let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+
+function updateRanking() {
+    leaderboard.sort((a,b)=>b.score-a.score);
+    let html = '';
+    leaderboard.slice(0,5).forEach((p,i)=>{
+        html += `${i+1}. ${p.name}: ${p.score} 🪙<br>`;
+    });
+    rankingDiv.innerHTML = html;
+}
+updateRanking();
+
+// Логика атаки
+attackBtn.addEventListener('click', ()=>{
+    if(playerHp<=0) return alert("Вы проиграли! Обновите страницу для новой игры.");
+    if(npcHp<=0) return alert("Вы победили! Обновите страницу для новой игры.");
+
+    // Наносим урон NPC
+    npcHp -= attackPower;
+    coins += attackPower;
     coinsEl.textContent = coins;
-    rankingEl.textContent = ranking;
+    npcHpEl.textContent = npcHp;
 
-    // Логика клика
-    mainAnimal.addEventListener('click', () => {
-        coins += 1;
-        ranking += 1;
+    // NPC наносит случайный урон игроку
+    const npcAttack = Math.floor(Math.random()*5)+1;
+    playerHp -= npcAttack;
+    playerHpEl.textContent = playerHp;
+
+    // Сохраняем монетки и прогресс
+    localStorage.setItem('coins', coins);
+
+    // Если победа
+    if(npcHp<=0){
+        alert("Вы победили! 🎉");
+        let name = prompt("Введите ваше имя для рейтинга:","Игрок");
+        leaderboard.push({name:name,score:coins});
+        localStorage.setItem('leaderboard',JSON.stringify(leaderboard));
+        updateRanking();
+    }
+
+    if(playerHp<=0){
+        alert("Вы проиграли 😢");
+    }
+});
+
+// Апгрейд удара
+upgradeBtn.addEventListener('click',()=>{
+    if(coins>=10){
+        coins -= 10;
+        attackPower += 1;
         coinsEl.textContent = coins;
-        rankingEl.textContent = ranking;
         localStorage.setItem('coins', coins);
-        localStorage.setItem('ranking', ranking);
-    });
+        localStorage.setItem('attackPower', attackPower);
+        alert("Урон увеличен! 💥");
+    } else {
+        alert("Недостаточно монет 🪙");
+    }
+});
 
-    // Смена животных
-    animalButtons.forEach(img => {
-        img.addEventListener('click', () => {
-            mainAnimal.src = img.src;
-            animalButtons.forEach(i => i.classList.remove('selected'));
-            img.classList.add('selected');
-        });
+// Выбор персонажей
+const animalButtons = document.querySelectorAll('#animalsButtons img');
+animalButtons.forEach(img=>{
+    img.addEventListener('click',()=>{
+        mainAnimal.src = img.src;
+        animalButtons.forEach(i=>i.classList.remove('selected'));
+        img.classList.add('selected');
     });
+});
 </script>
-
 </body>
 </html>
