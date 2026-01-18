@@ -1,62 +1,119 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>Cat Clicker</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Animal Clicker</title>
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: url('https://images.unsplash.com/photo-1508672019048-805c876b67e2?auto=format&fit=crop&w=1350&q=80') no-repeat center center fixed;
+        background-size: cover;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        overflow: hidden;
+    }
 
-    <style>
-        body {
-            margin: 0;
-            background: #f6f6f6;
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
+    .game {
+        text-align: center;
+        background: rgba(255,255,255,0.8);
+        padding: 20px;
+        border-radius: 20px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
 
-        .game {
-            text-align: center;
-        }
+    h1 {
+        margin-bottom: 10px;
+        font-size: 28px;
+    }
 
-        h1 {
-            margin-bottom: 10px;
-        }
+    .coins {
+        font-size: 22px;
+        margin-bottom: 15px;
+    }
 
-        .coins {
-            font-size: 22px;
-            margin-bottom: 20px;
-        }
+    .animal {
+        width: 120px;
+        cursor: pointer;
+        transition: transform 0.1s;
+        user-select: none;
+    }
 
-        .cat {
-            font-size: 120px;
-            cursor: pointer;
-            user-select: none;
-            transition: transform 0.1s;
-        }
+    .animal:active {
+        transform: scale(0.9);
+    }
 
-        .cat:active {
-            transform: scale(0.9);
-        }
-    </style>
+    #animalsButtons img {
+        width: 60px;
+        margin: 5px;
+        cursor: pointer;
+        border: 2px solid transparent;
+        border-radius: 10px;
+        transition: 0.2s;
+    }
+
+    #animalsButtons img.selected {
+        border-color: gold;
+    }
+
+    .ranking {
+        margin-top: 15px;
+        font-size: 18px;
+    }
+</style>
 </head>
 <body>
 
 <div class="game">
-    <h1>😺 Tap the Cat</h1>
+    <h1>Animal Clicker</h1>
     <div class="coins">🪙 Монетки: <span id="coins">0</span></div>
-    <div class="cat" id="cat">🐱</div>
+    
+    <img id="mainAnimal" class="animal" src="https://cdn-icons-png.flaticon.com/512/616/616408.png" alt="animal">
+
+    <div id="animalsButtons">
+        <img src="https://cdn-icons-png.flaticon.com/512/616/616408.png" data-name="Кот" class="selected">
+        <img src="https://cdn-icons-png.flaticon.com/512/616/616408.png" data-name="Собака">
+        <img src="https://cdn-icons-png.flaticon.com/512/616/616497.png" data-name="Кролик">
+        <img src="https://cdn-icons-png.flaticon.com/512/616/616494.png" data-name="Лиса">
+    </div>
+
+    <div class="ranking">
+        🏆 Рейтинг: <span id="ranking">0</span>
+    </div>
 </div>
 
 <script>
-    let coins = 0;
-    const coinsEl = document.getElementById("coins");
-    const cat = document.getElementById("cat");
+    let coins = parseInt(localStorage.getItem('coins')) || 0;
+    let ranking = parseInt(localStorage.getItem('ranking')) || 0;
+    const coinsEl = document.getElementById('coins');
+    const rankingEl = document.getElementById('ranking');
+    const mainAnimal = document.getElementById('mainAnimal');
+    const animalButtons = document.querySelectorAll('#animalsButtons img');
 
-    cat.addEventListener("click", () => {
-        coins++;
+    // Обновляем счётчики
+    coinsEl.textContent = coins;
+    rankingEl.textContent = ranking;
+
+    // Логика клика
+    mainAnimal.addEventListener('click', () => {
+        coins += 1;
+        ranking += 1;
         coinsEl.textContent = coins;
+        rankingEl.textContent = ranking;
+        localStorage.setItem('coins', coins);
+        localStorage.setItem('ranking', ranking);
+    });
+
+    // Смена животных
+    animalButtons.forEach(img => {
+        img.addEventListener('click', () => {
+            mainAnimal.src = img.src;
+            animalButtons.forEach(i => i.classList.remove('selected'));
+            img.classList.add('selected');
+        });
     });
 </script>
 
