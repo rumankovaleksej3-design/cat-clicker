@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Cat Clicker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            margin: 0;
+            background: #f6f6f6;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .game {
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+        }
+
+        .coins {
+            font-size: 22px;
+            margin-bottom: 20px;
+        }
+
+        .cat {
+            font-size: 120px;
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.1s;
+        }
+
+        .cat:active {
+            transform: scale(0.9);
+        }
+    </style>
+</head>
+<body>
+
+<div class="game">
+    <h1>😺 Tap the Cat</h1>
+    <div class="coins">🪙 Монетки: <span id="coins">0</span></div>
+    <div class="cat" id="cat">🐱</div>
+</div>
+
+<script>
+    let coins = 0;
+    const coinsEl = document.getElementById("coins");
+    const cat = document.getElementById("cat");
+
+    cat.addEventListener("click", () => {
+        coins++;
+        coinsEl.textContent = coins;
+    });
+</script>
+
+</body>
+</html>
